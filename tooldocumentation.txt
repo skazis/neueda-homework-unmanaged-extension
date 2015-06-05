@@ -1,0 +1,58 @@
+Adding unmanaged extension to server.
+
+1) Copy file "jurgis_homework_unmanaged_extension.jar" in the neo4j plugin directory
+2) Edit neo4j "neo4j-server.properties" file and this line:
+org.neo4j.server.thirdparty_jaxrs_classes=com.neo4j.homework.unmanagedextension=/api
+Save file.
+3) Run neo4j server.
+
+Filling database with some data and sending manual requests.
+
+1) Open empty directory and copy these files inside:
+    2.1. csvsender.properties
+    2.2. database_user.csv
+    2.3. database_show.csv
+    2.4. database_relation.csv
+    2.5. jurgis_homework_unmanaged_extension.jar
+2) Tests were done in windows with 64-bit Java 1.7.0_79-b15
+3) Edit "csvsender.properties" and see if anything needs to be changed. If so, change and save the file.
+4) Open command prompt in the directory
+5) Run these commands (some CSV imports might not be that fast because of file size and that each row is a separate request,
+   also some of the data auto generated, therefore it might not be according to the extension rules and not accepted)
+   in the given order:
+
+   java -jar jurgis_homework_unmanaged_extension.jar -p csvsender.properties -iuser database_user.csv
+   java -jar jurgis_homework_unmanaged_extension.jar -p csvsender.properties -ishow database_show.csv
+   java -jar jurgis_homework_unmanaged_extension.jar -p csvsender.properties -irelation database_relation.csv
+
+   Database not should be a little populated with some fake and some "normal" nodes and relationships.
+
+6) What else to do with this tool:
+
+    Do HTTP GET:
+    java -jar jurgis_homework_unmanaged_extension.jar -p csvsender.properties -get resourceApiUrl
+
+    Do HTTP POST:
+    java -jar jurgis_homework_unmanaged_extension.jar -p csvsender.properties -post resourceApiUrl JSON_STRING
+
+    resourceApiUrl is only part of the whole URL that HTTP methods need. See "apidocumentation.txt" for these paths.
+    For example:
+        Get TV Shows liked by a User
+        {basepath}/neueda/user/{userMail}/getlikes
+
+        This means that /neueda/user/{userMail}/getlikes is passed as an API url in the command line parameters.
+
+    N.B. It is possible that JSON string will need escape characters for quotes. And no spaces must be used in JSON.
+
+
+Some useful Cypher queries that can be used, for example, in the neo4j web interface:
+Clean database:
+-------------------------
+MATCH n
+with n
+OPTIONAL MATCH n-[r]-()
+DELETE r,n
+-------------------------
+
+Get "Likes" graph
+MATCH (user:PERSON)-[:LIKES]->(show:TV_SHOW) RETURN user,show LIMIT 100

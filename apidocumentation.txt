@@ -1,0 +1,96 @@
+API
+
+{basepath}=http://serveraddress:port/path/to/unmanaged/extension
+
+Return is HTTP 200 status OK, other codes mean fatal failures.
+Return HTTP body is in JSON format.
+    Basic structure:
+        {"statusOk": value, "statusCode": value, "message": "value"}
+
+        statusOk:   boolean value. true if request was successful, false otherwise
+        statusCode: integer value of the HTTP response code
+        message:    a variable. can be string value or a JSON container (depending of the request, see below)
+
+Create user
+	HTTP method: POST
+	HTTP url: {basepath}/neueda/user/add
+	JSON HTTP body: {"mail":"value", "age":"value", "gender":"value"}
+		mail:   valid email (unique in the database)
+		age:    integer between 1 and 100 (inclusive)
+		gender: m or male, f or female
+    JSON response node "message" is a value node:
+        "User created" or "Explanation why not created"
+
+Create TV Show
+	HTTP method: POST
+	HTTP url: {basepath}/neueda/tvshow/add
+	JSON HTTP body: {"title":"value", "releaseDate":"value", "endDate":"value"}
+		title:       TV show title, between 1 and 50 (inclusive) characters
+		releaseDate: First air time of the show, valid format dd-MM-yyyy
+		endDate:     End time of the show, valid format dd-MM-yyyy. Must be empty string if there is no end date
+	JSON response node "message" is a value node:
+            "TV show added" or "Explanation why not added"
+
+Like a TV Show by user
+	HTTP method: POST
+	HTTP url: {basepath}/neueda/user/liketvshow
+	JSON HTTP body: {"title":"value", "mail":"value"}
+		mail:  valid email (unique in the database)
+		title: TV show title, between 1 and 50 (inclusive) characters
+	JSON response node "message" is a value node:
+                    "User now likes this TV Show" or "Explanation why Like was not added"
+
+Get TV Shows liked by a User
+	HTTP method: GET
+	HTTP url: {basepath}/neueda/user/{userMail}/getlikes
+	HTTP url path parameters:
+	    userMail: valid email (unique in the database)
+	JSON response node "message" is a value node with error reason if "statusOk" is false.
+    If "statusOk" is true, then "message" is a container of JSON node "tvshows" with value array:
+        "message": "{"tvshows":["value1","value2",...]}"
+
+Get TV shows by air date
+	HTTP method: GET
+	HTTP url: {basepath}/neueda/tvshow/aired/{airDate}
+	HTTP url path parameters:
+	    airDate: First air time of the show, valid format dd-MM-yyyy
+	JSON response node "message" is a value node with error reason if "statusOk" is false.
+    If "statusOk" is true, then "message" is a container of JSON node "tvshows" with value array:
+        "message": "{"tvshows":["value1","value2"]}"
+
+Get TV show recommendations for a user
+    HTTP method: GET
+    HTTP url: {basepath}/neueda/user/{userMail}/recommendations
+    HTTP url path parameters:
+        userMail: valid email (unique in the database)
+    JSON response node "message" is a value node with error reason if "statusOk" is false.
+    If "statusOk" is true, then "message" is a container of JSON node label:
+        1)"tvshow recommendations by users that liked user's shows"
+        2)"tvshow recommendations by age difference [n]", where n is age +/- around user's age
+
+        Label has value array: [{"show":"value","likes":value},{"show":"value","likes": value},...]
+
+    Recommendations go up to 10.
+    If nothing is found by first recommendation query, then second is used while age difference is 50
+    or some recommendation is found before.
+    Example of JSON response body:
+    {
+      "statusOk": true,
+      "statusCode": 200,
+      "message": {
+        "tvshow recommendations by users that liked user's shows": [
+          {
+            "show": "Veronica",
+            "likes": 3
+          },
+          {
+            "show": "Debs",
+            "likes": 1
+          }
+        ]
+      }
+    }
+
+
+
+
