@@ -4,7 +4,7 @@ It includes 2 packages.
 
 One represents unmanaged extension for neo4j server.
 
-The other is tool for importing large csv file into the database and doing POST and GET requests.
+The other is tool for importing large csv files into the database and doing POST and GET requests.
 Tool is used from command promt.
 
 For more information read:
